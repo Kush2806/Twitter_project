@@ -27,9 +27,12 @@ def login():
 root = tk.Tk()
 root.title("Twitter Clone")
 
-background_image = tk.PhotoImage(file="twitter.jpg")
+background_image = tk.PhotoImage(file="twitter1.png")
 background_label = tk.Label(root, image=background_image)
-background_label.place(relwidth=1, relheight=1)
+background_label.place(relx=.5, rely=0.2, anchor="center")
+background_label_width = background_image.width() // 2
+background_label_height = background_image.height() // 2
+background_label.config(width=background_label_width, height=background_label_height)
 
 username_label = tk.Label(root, text="Username", font=("Helvetica", 14), bg="#ffffff", fg="#1da1f2")
 username_label.place(relx=0.5, rely=0.3, anchor="center")
