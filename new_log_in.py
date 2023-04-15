@@ -67,7 +67,7 @@ def register():
         c.execute("INSERT INTO signup VALUES (?, ?, ?)", (username, confirm_password, mobile_no))
         conn.commit()
 
-        register_window.destroy()
+        # register_window.destroy()
         message_label.config(text="Registration successful!", fg="green")
 
     save_button = tk.Button(register_window, text="Save", font=("Helvetica", 14), bg="#1da1f2", fg="#ffffff", command=save_data)
