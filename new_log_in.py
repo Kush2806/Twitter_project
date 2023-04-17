@@ -78,47 +78,48 @@ def register():
     username_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
+def save_tweet(username, tweet):
+    conn = sqlite3.connect('signup.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO tweets (username, tweet) VALUES (?, ?)", (username, tweet))
+    messagebox.showinfo("Success", "Your tweet has been posted!")
+    conn.commit()
+    conn.close()
+
 def display_tweets(username):
-    tweet_window = tk.Toplevel()
-    tweet_window.title(f"Welcome, {username}!")
+    tweet_window = tk.Toplevel(main_window)
+    tweet_window.title("Tweet")
     tweet_window.geometry("500x500")
 
-    username_label = tk.Label(tweet_window, text=f"Welcome, {username}!", font=("Helvetica", 16))
-    username_label.pack(pady=10)
-
-    tweet_entry = tk.Text(tweet_window, height=5, width=50)
-    tweet_entry.pack(pady=10)
-
-    def post_tweet():
-        tweet_text = tweet_entry.get("1.0", "end-1c")
-        if tweet_text:
-            conn = sqlite3.connect('twitter.db')
-            c = conn.cursor()
-            c.execute("INSERT INTO tweets (username, tweet) VALUES (?, ?)", (username, tweet_text))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo("Success", "Your tweet has been posted!")
-            tweet_entry.delete("1.0", "end")
-        else:
-            messagebox.showerror("Error", "Please enter a tweet!")
-
-    post_button = tk.Button(tweet_window, text="Post", command=post_tweet, bg="blue", fg="white")
-    post_button.pack(pady=10)
-
-    previous_tweets_label = tk.Label(tweet_window, text="Previous Tweets", font=("Helvetica", 12))
-    previous_tweets_label.pack(pady=10)
-
-    previous_tweets_entry = tk.Text(tweet_window, height=10, width=50)
-    previous_tweets_entry.pack(pady=10)
-
-    conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('signup.db')
     c = conn.cursor()
     c.execute("SELECT tweet FROM tweets WHERE username=?", (username,))
-    rows = c.fetchall()
-    if rows:
-        previous_tweets_entry.insert("end", "\n".join([row[0] for row in rows]))
+    tweet_rows = c.fetchall()
+    conn.close()
+
+    tweet_label = tk.Label(tweet_window, text="Tweets:")
+    tweet_label.pack()
+
+    scrollbar = tk.Scrollbar(tweet_window)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    tweet_text = tk.Text(tweet_window, yscrollcommand=scrollbar.set)
+    tweet_text.pack(fill=tk.BOTH)
+    scrollbar.config(command=tweet_text.yview)
+
+    if tweet_rows:
+        for row in tweet_rows:
+            tweet_text.insert(tk.END, "- " + row[0] + "\n")
     else:
-        previous_tweets_entry.insert("end", "No tweets to display.")
+        tweet_text.insert(tk.END, "No tweets yet.\n")
+
+    new_tweet_entry = tk.Entry(tweet_window)
+    new_tweet_text = new_tweet_entry.get()
+    new_tweet_entry.pack()
+    new_tweet_button = tk.Button(tweet_window, text="Tweet", command=lambda: save_tweet(username,new_tweet_text))
+    new_tweet_button.place(relx=1.0, rely=0.0, anchor="ne")
+    new_tweet_button.pack()
+
+    new_tweet_entry.focus()
 
 def login():
     username = username_entry.get()
@@ -133,7 +134,7 @@ def login():
 
     if result:
         display_tweets(username)
-        # message_label.config(text="Login successful!", fg="green")
+        message_label.config(text="Login successful!", fg="green")
     else:
         message_label.config(text="Invalid username or password.", fg="red")
 
